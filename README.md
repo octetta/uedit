@@ -20,7 +20,7 @@ int r = uedit("> ", buf, sizeof(buf));
 
 `uedit` blocks until the user presses Enter or Ctrl-D.
 
-**Returns** `0` on Enter (line is in `buf`, NUL-terminated), `-1` on Ctrl-D / EOF.
+**Returns** the number of characters in `buf` on Enter (`>= 0`), `-1` on Ctrl-D / EOF.
 
 ## Keybindings
 

@@ -10,12 +10,12 @@ int main(void) {
         int r = uedit("> ", buf, sizeof(buf));
 
         if (r == -1) {
-            /* Ctrl-D */
+            /* Ctrl-D on empty line */
             printf("(EOF)\n");
             break;
         }
 
-        if (buf[0] == '\0') {
+        if (r == 0) {
             /* Empty line — just re-prompt */
             continue;
         }
@@ -23,7 +23,7 @@ int main(void) {
         if (strcmp(buf, "quit") == 0)
             break;
 
-        printf("You said: %s\n", buf);
+        printf("You said: %s (len:%d)\n", buf, r);
     }
 
     printf("Goodbye.\n");

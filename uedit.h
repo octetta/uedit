@@ -75,7 +75,7 @@ static void uedit_refresh_line(const char *prompt, const char *buf, int cur) {
  * buf      – caller-supplied buffer that receives the edited line
  * max_line – size of buf in bytes; at most max_line-1 characters are stored
  *
- * Returns  0 on Enter (buf holds the line, NUL-terminated)
+ * Returns  the number of characters in buf on Enter (>= 0)
  *         -1 on Ctrl-D / EOF
  *
  * History: the last non-empty line entered is recalled with Up-arrow.
@@ -108,6 +108,7 @@ static int uedit(const char *prompt, char *buf, int max_line) {
             putchar('\n');
             if (len > 0)
                 strncpy(uedit_last_cmd, buf, UEDIT_MAX_LINE - 1);
+            r = len;
             break;
 
         /* --- Backspace ---------------------------------------------------- */
