@@ -31,7 +31,7 @@ int r = uedit("> ", buf, sizeof(buf));
 | Backspace / Delete | Delete character |
 | Up arrow | Recall last line |
 | Enter | Confirm |
-| Ctrl-D | EOF / exit |
+| Ctrl-D | Delete character at cursor, or EOF if line is empty |
 
 ## Building
 
