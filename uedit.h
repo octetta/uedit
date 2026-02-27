@@ -159,10 +159,18 @@ static int uedit(const char *prompt, char *buf, int max_line) {
             }
 #endif
 
-        /* --- Ctrl-D: EOF / exit ------------------------------------------ */
+        /* --- Ctrl-D: delete forward if text present, else EOF ------------ */
         } else if (c == CTRL_KEY('d')) {
-            r = -1;
-            break;
+            if (len > 0) {
+                /* behave like the Delete key */
+                if (cur < len) {
+                    memmove(&buf[cur], &buf[cur + 1], len - cur - 1);
+                    len--; buf[len] = '\0';
+                }
+            } else {
+                r = -1;
+                break;
+            }
 
         /* --- Printable character insertion -------------------------------- */
         } else if (c >= 32 && c <= 126 && len < max_line - 1) {
