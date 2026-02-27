@@ -1,6 +1,8 @@
 # uedit
 
-A single-header C library for interactive line editing in the terminal. Drop `uedit.h` into your project and get cursor movement, insert/delete, and basic history with no dependencies.
+A single-header C library for interactive line editing in the terminal.
+Drop `uedit.h` into your project and get cursor movement, insert/delete,
+and basic history with no dependencies.
 
 ## Features
 
@@ -8,6 +10,13 @@ A single-header C library for interactive line editing in the terminal. Drop `ue
 - Insert and delete characters anywhere in the line
 - Recall the last entered line with the Up arrow
 - Works on Linux, macOS, and Windows
+
+*this is an intentionally low-feature option that scratches my own itch*
+If you need more features or better written code, I **highly** recommend
+one of these two projects:
+
+- [`linenoise`](https://github.com/antirez/linenoise)
+- [`bestline`](https://github.com/jart/bestline)
 
 ## Usage
 
