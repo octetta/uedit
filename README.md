@@ -1,5 +1,7 @@
 # uedit
 
+[![CodeFactor](https://www.codefactor.io/repository/github/octetta/uedit/badge)](https://www.codefactor.io/repository/github/octetta/uedit)
+
 A single-header C library for interactive line editing in the terminal.
 Drop `uedit.h` into your project and get cursor movement, insert/delete,
 multi-line history, and standard REPL shortcuts with no dependencies.
