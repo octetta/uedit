@@ -13,6 +13,8 @@ multi-line history, and standard REPL shortcuts with no dependencies.
 - Advanced editing: clear line (ctrl-U), kill-to-end (ctrl-K), clear screen (ctrl-L).
 - Configurable: adjust history depth at runtime.
 - Cross-platform: Native support Linux, macOS, and Windows.
+- Event-loop friendly: optionally wake on a POSIX file descriptor or Windows
+  wait handle while editing a line.
 
 *this is an intentionally low-feature option that scratches my own itch*
 If you need more features or better written code, I **highly** recommend
@@ -35,6 +37,87 @@ int r = uedit("> ", buf, sizeof(buf));
 `uedit` blocks until the user presses Enter or ctrl-D.
 
 **Returns** the number of characters in `buf` on Enter (`>= 0`), `-1` on ctrl-D / EOF.
+
+## API
+
+```c
+typedef void (*uedit_event_cb)(void *user);
+
+int uedit(const char *prompt, char *buf, int max_line);
+
+int uedit_with_event(const char *prompt,
+                     char *buf,
+                     int max_line,
+                     int event_fd,
+                     void *event_handle,
+                     uedit_event_cb on_event,
+                     void *event_user);
+```
+
+`uedit_with_event` is the same editor with one additional wake source:
+
+- On Linux/macOS, pass a selectable `event_fd`, or `-1` if unused.
+- On Windows, pass a waitable `HANDLE` as `event_handle`, or `NULL` if unused.
+- When the event source is ready, `on_event(event_user)` runs and the current
+  input line is redrawn. The callback should service the event source, for
+  example by draining a pipe, socket, or application event queue.
+- `uedit(prompt, buf, max_line)` is a wrapper around `uedit_with_event` with no
+  event source.
+
+The event callback runs on the same thread that called `uedit_with_event`; no
+background thread is created.
+
+## POSIX select Example
+
+This example uses a self-pipe as a wake source. A real application could use a
+socket, timer fd, control-event fd, or any descriptor that can be used with
+`select()`.
+
+```c
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include "uedit.h"
+
+static void drain_event(void *user) {
+    int fd = *(int *)user;
+    char buf[64];
+    while (read(fd, buf, sizeof(buf)) > 0) {
+    }
+    printf("\n[event serviced]\n");
+}
+
+int main(void) {
+    int pipefd[2];
+    char line[256];
+
+    if (pipe(pipefd) != 0) return 1;
+
+    fcntl(pipefd[0], F_SETFL, fcntl(pipefd[0], F_GETFL, 0) | O_NONBLOCK);
+    fcntl(pipefd[1], F_SETFL, fcntl(pipefd[1], F_GETFL, 0) | O_NONBLOCK);
+
+    /*
+     * Demo only: queue one event before entering the editor. In a real program
+     * another subsystem would write to pipefd[1] when work is ready.
+     */
+    write(pipefd[1], "x", 1);
+
+    while (uedit_with_event("> ", line, sizeof(line),
+                            pipefd[0], NULL, drain_event, &pipefd[0]) >= 0) {
+        if (strcmp(line, "quit") == 0) break;
+        printf("command: %s\n", line);
+    }
+
+    close(pipefd[0]);
+    close(pipefd[1]);
+    return 0;
+}
+```
+
+On Windows, pass a waitable object such as a manual-reset event created with
+`CreateEvent` as `event_handle`. The callback should service the work and reset
+the event when appropriate.
 
 ## Keybindings
 
